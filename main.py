@@ -125,7 +125,7 @@ if __name__ == '__main__':
         with tf.Session(graph=graph.finalize()) as sess:
             initialize.run()
             langevin_1_run = lambda: sess.run(langevin_1, feed_dict={z: z_val, y: y_val})
-            print(np.sum(timeit.Timer(langevin_1_run).repeat(number=repeat)))
+            time1 = timeit.Timer(langevin_1_run).timeit(number=repeat)
 
     # langevin 2
     with tf.Graph().as_default() as graph:
@@ -143,4 +143,7 @@ if __name__ == '__main__':
             def langevin_2_run():
                 for i in range(t):
                     langevin_2.run(feed_dict={y: y_val})
-            print(np.sum(timeit.Timer(langevin_2_run).repeat(number=repeat)))
+            time2 = timeit.Timer(langevin_2_run).timeit(number=repeat)
+
+    print('time(langevin1) = {0}s'.format(time1))
+    print('time(langevin2) = {0}s'.format(time2))
