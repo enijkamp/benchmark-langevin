@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
         with tf.Session(graph=graph.finalize()) as sess:
             initialize.run()
-            langevin_1_run = lambda: langevin_1.run(feed_dict={z: z_val, y: y_val})
+            langevin_1_run = lambda: sess.run(langevin_1, feed_dict={z: z_val, y: y_val})
             print(timeit.Timer(langevin_1_run).repeat(number=10))
 
     # langevin 2
