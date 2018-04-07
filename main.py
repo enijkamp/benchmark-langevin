@@ -107,6 +107,8 @@ if __name__ == '__main__':
     delta = 0.01
     image_size = 64
 
+    repeat = 100
+
     z_val = np.random.randn(num_chain, z_size)
     y_val = np.random.randn(num_chain, image_size, image_size, 3)
 
@@ -123,7 +125,7 @@ if __name__ == '__main__':
         with tf.Session(graph=graph.finalize()) as sess:
             initialize.run()
             langevin_1_run = lambda: sess.run(langevin_1, feed_dict={z: z_val, y: y_val})
-            print(timeit.Timer(langevin_1_run).repeat(number=10))
+            print(np.sum(timeit.Timer(langevin_1_run).repeat(number=repeat)))
 
     # langevin 2
     with tf.Graph().as_default() as graph:
@@ -141,4 +143,4 @@ if __name__ == '__main__':
             def langevin_2_run():
                 for i in range(t):
                     langevin_2.run(feed_dict={y: y_val})
-            print(timeit.Timer(langevin_2_run).repeat(number=10))
+            print(np.sum(timeit.Timer(langevin_2_run).repeat(number=repeat)))
