@@ -73,9 +73,9 @@ def langevin_generator_1(t, num_chain, z_size, sigma, delta, z_arg, y, generator
     def body(i, z):
         noise = tf.random_normal(shape=[num_chain, z_size], name='noise')
         y_gen = generator(z)
-        gen_loss = tf.reduce_mean(1.0 / (2 * sigma * sigma) * tf.square(y - y_gen), axis=0)
+        gen_loss = tf.reduce_mean(1.0 / (2 * tf.pow(sigma, 2)) * tf.square(y - y_gen), axis=0)
         grad = tf.gradients(gen_loss, z, name='grad_gen')[0]
-        z = z - 0.5 * delta * delta * (z + grad) + delta * noise
+        z = z - 0.5 * tf.pow(delta, 2) * (z + grad) + delta * noise
         return tf.add(i, 1), z
 
     with tf.name_scope("langevin_generator_1"):
@@ -86,7 +86,7 @@ def langevin_generator_1(t, num_chain, z_size, sigma, delta, z_arg, y, generator
 
 def langevin_generator_2(t, num_chain, z_size, sigma, delta, z, y, generator):
     Gy = generator(z)
-    cost = (tf.nn.l2_loss(Gy - y) / (1*tf.pow(sigma,2))+tf.nn.l2_loss(z))/num_chain
+    cost = tf.nn.l2_loss(Gy - y) / (1*tf.pow(sigma,2))
     opt = tf.train.GradientDescentOptimizer(1)
     gv = opt.compute_gradients(cost,[z])
     def T(g):
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     delta = 0.01
     image_size = 64
 
-    repeat = 100
+    repeat = 200
 
     z_val = np.random.randn(num_chain, z_size)
     y_val = np.random.randn(num_chain, image_size, image_size, 3)
@@ -145,5 +145,5 @@ if __name__ == '__main__':
                     langevin_2.run(feed_dict={y: y_val})
             time2 = timeit.Timer(langevin_2_run).timeit(number=repeat)
 
-    print('time(langevin1) = {0}s'.format(time1))
-    print('time(langevin2) = {0}s'.format(time2))
+    print('time(langevin1) = {0:.2f}s'.format(time1)) # 60.39s
+    print('time(langevin2) = {0:.2f}s'.format(time2)) # 63.14s
